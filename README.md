@@ -67,6 +67,7 @@ Bulk tier assignment runs lightweight. Full quote-level reasoning, conflict dete
 ### Pipeline
 
 Upload JD
+
 → LLM refines JD + extracts criteria
 → Recruiter confirms/edits
 → Upload resumes (PDF → text via pdf.js)
