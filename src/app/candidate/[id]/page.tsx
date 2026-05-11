@@ -15,8 +15,6 @@ import type {
   CandidateCommentType,
 } from "@/types";
 
-const roles: CandidateCommentRole[] = ["recruiter", "hiringManager", "teamLead"];
-
 const roleLabels: Record<CandidateCommentRole, string> = {
   recruiter: "Recruiter",
   hiringManager: "Hiring manager",
@@ -255,7 +253,9 @@ export default function CandidateDetailPage() {
                   >
                     {displayQuote !== "General Analysis" && (
                       <div className="mb-5 rounded-lg bg-zinc-50 p-4 border-l-4 border-zinc-300">
-                        <p className="text-sm italic text-zinc-600">"{displayQuote}"</p>
+                        <p className="text-sm italic text-zinc-600">
+                          &ldquo;{displayQuote}&rdquo;
+                        </p>
                       </div>
                     )}
                   <div className="space-y-4">

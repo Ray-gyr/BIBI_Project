@@ -7,7 +7,6 @@ import {
   useEffect,
   useMemo,
   useReducer,
-  useState,
 } from "react";
 import type {
   Candidate,
@@ -50,7 +49,6 @@ type RecruitingContextValue = RecruitingState & {
 };
 
 type Action =
-  | { type: "hydrate"; state: Partial<RecruitingState> }
   | {
       type: "setJobRefinement";
       payload: {
@@ -91,29 +89,10 @@ const RecruitingContext = createContext<RecruitingContextValue | null>(null);
 
 export function RecruitingProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(recruitingReducer, initialState);
-  const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
-    const persistedState = loadPersistedState();
-
-    if (persistedState) {
-      dispatch({ type: "hydrate", state: persistedState });
-    }
-
-    setHasHydrated(true);
+    clearPersistedState();
   }, []);
-
-  useEffect(() => {
-    if (!hasHydrated) {
-      return;
-    }
-
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      sessionStorage.removeItem(STORAGE_KEY);
-    }
-  }, [hasHydrated, state]);
 
   const setJobRefinement = useCallback(
     (payload: {
@@ -195,8 +174,6 @@ export function useRecruitingStore() {
 
 function recruitingReducer(state: RecruitingState, action: Action): RecruitingState {
   switch (action.type) {
-    case "hydrate":
-      return normalizeState({ ...state, ...action.state });
     case "setJobRefinement":
       return {
         ...state,
@@ -273,51 +250,6 @@ function recruitingReducer(state: RecruitingState, action: Action): RecruitingSt
       return initialState;
     default:
       return state;
-  }
-}
-
-function normalizeState(state: Partial<RecruitingState>): RecruitingState {
-  return {
-    ...initialState,
-    ...state,
-    criteria: state.criteria ?? null,
-    resumeTexts: state.resumeTexts ?? {},
-    resumes: (state.resumes ?? []).map((resume) => ({
-      ...resume,
-      id: normalizeNumericId(resume.id),
-      fileSize: resume.fileSize ?? 0,
-    })),
-    candidates: (state.candidates ?? []).map((candidate) => ({
-      ...candidate,
-      id: normalizeNumericId(candidate.id),
-    })),
-    selectedCandidateDetail: state.selectedCandidateDetail ?? null,
-    candidateDetails: state.candidateDetails ?? {},
-  };
-}
-
-function normalizeNumericId(value: unknown): number {
-  if (typeof value === "number" && Number.isFinite(value)) {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number.parseInt(value, 10);
-
-    if (Number.isFinite(parsed)) {
-      return parsed;
-    }
-  }
-
-  return Date.now();
-}
-
-function loadPersistedState(): Partial<RecruitingState> | null {
-  try {
-    const rawState = sessionStorage.getItem(STORAGE_KEY);
-    return rawState ? (JSON.parse(rawState) as Partial<RecruitingState>) : null;
-  } catch {
-    return null;
   }
 }
 

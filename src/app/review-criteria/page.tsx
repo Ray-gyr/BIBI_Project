@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CriteriaEditor } from "@/components/CriteriaEditor";
 import { EmptyState } from "@/components/EmptyState";
@@ -33,12 +33,6 @@ export default function ReviewCriteriaPage() {
   const [activeSelection, setActiveSelection] = useState<string>("");
   const [draftInstruction, setDraftInstruction] = useState("");
   const [isRefining, setIsRefining] = useState(false);
-
-  useEffect(() => {
-    if (criteria) {
-      setDraft(criteria);
-    }
-  }, [criteria]);
 
   if (!criteria || !rawJD) {
     return (
@@ -179,7 +173,7 @@ export default function ReviewCriteriaPage() {
                   New Comment
                 </p>
                 <p className="mt-2 text-sm leading-6 text-zinc-700 line-clamp-3 italic">
-                  "{activeSelection}"
+                  &ldquo;{activeSelection}&rdquo;
                 </p>
                 <textarea
                   value={draftInstruction}
@@ -212,7 +206,7 @@ export default function ReviewCriteriaPage() {
                 {comments.map((comment, index) => (
                   <div key={index} className="relative rounded-lg bg-zinc-50 p-3 pr-8 border border-zinc-100">
                     <p className="text-xs leading-5 text-zinc-500 italic line-clamp-2">
-                      "{comment.selectedText}"
+                      &ldquo;{comment.selectedText}&rdquo;
                     </p>
                     <p className="mt-1 text-sm font-medium text-zinc-900">
                       {comment.instruction}

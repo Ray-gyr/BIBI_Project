@@ -12,9 +12,6 @@ const tiers: CandidateTier[] = ["Strong Hire", "Hire", "Maybe", "No"];
 
 export default function ResultsPage() {
   const { candidates } = useRecruitingStore();
-  const recommendedCount = candidates.filter(
-    (candidate) => candidate.tier === "Strong Hire" || candidate.tier === "Hire",
-  ).length;
   const followUpRiskCount = candidates.filter(
     (candidate) =>
       candidate.tier === "Maybe" ||
@@ -75,4 +72,3 @@ export default function ResultsPage() {
     </div>
   );
 }
-

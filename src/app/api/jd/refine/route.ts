@@ -1,36 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { JDInputSchema } from "@/lib/langchain/jd-schemas";
 import { refineJD } from "@/lib/langchain/jd-refiner";
-import { z } from "zod";
+import {
+  internalErrorResponse,
+  logRouteError,
+  serviceUnavailableResponse,
+  validateJsonRequest,
+} from "@/lib/server/api-security";
 
-export async function POST(req: NextRequest) {
+const MAX_REFINE_BODY_BYTES = 80_000;
+
+export async function POST(request: Request) {
+  if (!process.env.GOOGLE_API_KEY) {
+    return serviceUnavailableResponse();
+  }
+
+  const validation = await validateJsonRequest(request, JDInputSchema, {
+    maxBytes: MAX_REFINE_BODY_BYTES,
+  });
+
+  if (!validation.ok) {
+    return validation.response;
+  }
+
   try {
-    const body = await req.json();
-
-    // 1. Validate the input using Zod (Defensive Programming)
-    const validatedInput = JDInputSchema.parse(body);
-
-    // 2. Call the LangChain service
-    const result = await refineJD(validatedInput);
-
-    // 3. Return the successful response
+    const result = await refineJD(validation.data);
     return NextResponse.json(result, { status: 200 });
-
-  } catch (error) {
-    console.error("Error in /api/jd/refine:", error);
-
-    // Handle Zod validation errors
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Validation Error", details: error.format() },
-        { status: 400 }
-      );
-    }
-
-    // Handle generic errors (e.g., LangChain/API failure)
-    return NextResponse.json(
-      { error: "Internal Server Error", message: (error as Error).message },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    logRouteError("/api/jd/refine", error);
+    return internalErrorResponse();
   }
 }

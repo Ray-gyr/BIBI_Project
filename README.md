@@ -89,5 +89,30 @@ Upload JD
 **Why Gemini 3.0 Flash?**
 Slate runs 4 LLM calls per candidate. Cost compounds. Flash is the most affordable Tier-1 model with enough reasoning depth for semantic resume evaluation and strict JSON output— no Pro-tier capability needed, no Pro-tier price paid.
 
+## Environment
+
+Create `.env.local` from `.env.example` and set the Gemini API key before running the app:
+
+```bash
+cp .env.example .env.local
+```
+
+```bash
+GOOGLE_API_KEY=replace-with-your-google-ai-api-key
+```
+
+Restart `npm run dev` after changing `.env.local`; Next.js reads server environment variables at startup.
+
+## Production Access Control
+
+Production deployments require Basic Auth before any app or API route is accessible:
+
+```bash
+BIBI_APP_USERNAME=slate
+BIBI_APP_PASSWORD=replace-with-a-long-random-password
+```
+
+If `BIBI_APP_PASSWORD` is missing or shorter than 16 characters in production, the app fails closed with `503`.
+
 
 *Built at [BIBI] · Presented at Google*

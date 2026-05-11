@@ -288,10 +288,7 @@ function createResumeId(filename: string): number {
     (total, character) => total + character.charCodeAt(0),
     0,
   );
-  const randomSeed =
-    typeof crypto !== "undefined"
-      ? crypto.getRandomValues(new Uint32Array(1))[0]
-      : Math.floor(Math.random() * 1_000_000);
+  const randomSeed = crypto.getRandomValues(new Uint32Array(1))[0];
 
   return Date.now() + filenameSeed + randomSeed;
 }

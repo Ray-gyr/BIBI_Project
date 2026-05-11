@@ -1,38 +1,33 @@
 import { NextResponse } from "next/server";
 import { analyzeResumesBatch } from "@/lib/langchain/resume-analyzer";
 import { Api2InputSchema } from "@/lib/langchain/resume-schemas";
+import {
+  internalErrorResponse,
+  logRouteError,
+  serviceUnavailableResponse,
+  validateJsonRequest,
+} from "@/lib/server/api-security";
+
+const MAX_ANALYZE_BODY_BYTES = 1_200_000;
 
 export async function POST(request: Request) {
+  if (!process.env.GOOGLE_API_KEY) {
+    return serviceUnavailableResponse();
+  }
+
+  const validation = await validateJsonRequest(request, Api2InputSchema, {
+    maxBytes: MAX_ANALYZE_BODY_BYTES,
+  });
+
+  if (!validation.ok) {
+    return validation.response;
+  }
+
   try {
-    // Check for API key existence before processing
-    if (!process.env.GOOGLE_API_KEY) {
-      return NextResponse.json(
-        { error: "GOOGLE_API_KEY is not defined in environment variables." },
-        { status: 500 }
-      );
-    }
-
-    const body = await request.json();
-    
-    // Validate request body
-    const validatedData = Api2InputSchema.safeParse(body);
-    
-    if (!validatedData.success) {
-      return NextResponse.json(
-        { error: "Invalid request payload", details: validatedData.error.format() },
-        { status: 400 }
-      );
-    }
-
-    // Call the LangChain pipeline
-    const result = await analyzeResumesBatch(validatedData.data);
-    
+    const result = await analyzeResumesBatch(validation.data);
     return NextResponse.json(result);
-  } catch (error: any) {
-    console.error("Error in analyze-resumes API:", error);
-    return NextResponse.json(
-      { error: "Internal server error during resume analysis", details: error.message },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    logRouteError("/api/analyze-resumes", error);
+    return internalErrorResponse();
   }
 }
