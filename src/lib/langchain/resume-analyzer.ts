@@ -47,7 +47,7 @@ Output Requirements:
 4. Conflicts: Explicitly state where the roles disagree in 1 short sentence (e.g., "recruiter likes the pedigree, but teamLead worries about lack of modern tech stack"). If no conflicts, just say "None".
 
 Tier explanation:
-1.Strong Hire: Exceptional match. Meets all Must-haves and the majority of Nice-to-haves. Demonstrates high technical maturity and zero red flags.
+1.Strong Hire: Exceptional match. Meets all Must-haves and about 80% of Nice-to-haves. Demonstrates high technical maturity and zero red flags.
 2. Hire: Solid match. Meets all Must-haves. Possesses core competencies required for the role with minor gaps in non-essential "bonus" areas.
 3. Maybe: Borderline match. Meets core Must-haves but shows "Unclear" signals or minor Red Flags that require manual recruiter verification.
 No: Automatic rejection. Fails one or more Must-haves or triggers significant, non-negotiable Red Flags defined in the JD.
@@ -189,9 +189,18 @@ export async function analyzeCandidateDetail(input: Api3InputType): Promise<Api3
 
   // Define the isolated roles
   const roles = [
-    { name: "recruiter", focus: "Keywords & Career Trajectory: Focus on keyword density, job stability (tenure), education prestige, and STAR method usage. Identify if the candidate is a safe bet." },
-    { name: "hiringManager", focus: "Logistics & Risk: Focus on location fit, work authorization (if mentioned), seniority level vs. budget, soft skills signals, and organizational Red Flags." },
-    { name: "teamLead", focus: "Technical Depth & Execution: Focus on the specific tech stack, complexity of projects, system design choices, and proof of work. Look for engineering maturity beyond just buzzwords." }
+  { 
+    name: "recruiter", 
+    focus: "Strategic talent scout: Focus on career trajectory and growth signals. Identify 'hidden gems' by looking past formatting to find consistent professional progression and high-level strategic alignment with the JD." 
+  },
+  { 
+    name: "hiringManager", 
+    focus: "Organizational architect: Evaluate narrative consistency and soft-skill evidence. Assess if the candidate's experience justifies their seniority and if their communication style suggests a high-impact team fit." 
+  },
+  { 
+    name: "teamLead", 
+    focus: "Technical auditor: Perform a deep semantic scan for 'logic holes' in project descriptions. Look for engineering maturity in system design choices and detect contradictions between claimed skills and actual project complexity. Ignore buzzword density in favor of proof of work." 
+  }
   ];
 
   // Step 2: Run isolated agents in parallel

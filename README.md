@@ -1,62 +1,93 @@
-# SLATE Recruiter Assistant
+# Slate
 
-AI-powered recruiter workflow built with Next.js App Router, TypeScript, TailwindCSS, and pdf.js.
+> *A slate isn't a list of applicants. It's a list of people worth hiring.*
 
-## What it does
+Most recruiting tools help you filter faster. Slate helps you **choose better**.
 
-- Refines a rough job description into structured hiring criteria.
-- Lets recruiters edit and confirm must-haves, nice-to-haves, and red flags.
-- Extracts text from uploaded PDF resumes in the browser with pdf.js.
-- Caches extracted resume text in workflow state so PDFs are not reprocessed.
-- Sends cached resume text to the AI ranking API.
-- Displays ranked candidates and candidate-level multi-role feedback.
+---
 
-## Backend APIs
+## The Problem
 
-The frontend calls these endpoints through `src/lib/api.ts`:
+Recruiting has a **selection** problem, not a filtering problem.
 
-- `POST /api/refine-jd`
-- `POST /api/analyze-resumes`
-- `POST /api/candidate-detail`
+When criteria are vague, recruiters default to elimination — cutting obvious mismatches instead of confidently identifying the right person. The result: false positives slip through, hiring managers push back, and the shortlist reflects who *survived* the process rather than who's actually best for the role.
 
-Current ID contract:
+Traditional ATS tools match keywords, not capability. And aligning a recruiter, hiring manager, and tech lead on the same candidate means three separate reviews and a meeting nobody has time for.
 
-- Candidate IDs are numbers.
-- Resume IDs sent to analysis are numbers so candidate drill-down can reuse cached resume text.
-- API 2 candidate summaries include `consensus` and `conflicts`; interview questions are not expected there.
-- API 3 accepts a numeric `candidateID`, returns numeric chunk IDs, numeric comment `chunkId` values, and a `summary` with `overview` plus `interviewQuestions`.
+---
 
-By default, requests are sent to the same origin. If the backend is hosted elsewhere, set:
+## The Solution
 
-```bash
-NEXT_PUBLIC_API_BASE_URL=https://your-backend.example.com
-```
+Slate gives one recruiter the perspective of three experts, grounded in criteria they define and control.
 
-For demos without a live backend, force deterministic mock responses:
+No new workflow. No black-box scores. AI assists the decision — it doesn't make it.
 
-```bash
-NEXT_PUBLIC_USE_MOCK_API=true npm run dev
-```
+---
 
-Mock fallback is enabled by default for missing, timed-out, or unreachable APIs. Disable it with:
+## Key Features
 
-```bash
-NEXT_PUBLIC_ENABLE_MOCK_FALLBACK=false npm run dev
-```
+**1. JD Refinement & Criteria Extraction**
+Upload any job description. Slate rewrites it and extracts three evaluation dimensions the recruiter confirms before any resume is touched:
 
-## Run
+- **Must-Meet** — Hard requirements. Absence = rejection.
+- **Nice-to-Have** — Signals that predict excellence, not just qualification.
+- **Red Flags** — Patterns that predict failure in this specific role.
 
-```bash
-npm install
-npm run dev
-```
+**2. Three-Agent Resume Analysis**
+Every resume is evaluated by three specialized agents simultaneously:
 
-Open `http://localhost:3000`.
+| Agent | Focus |
+|---|---|
+| **Recruiter** | Focuses on strategic alignment, career trajectory, and overall experience level |
+| **Hiring Manager** | Evaluates organizational fit, soft skills, communication clarity, and long-term stability |
+| **Tech Lead** | Scrutinizes technical depth, identifies logical gaps in project descriptions, and assesses hard-skill proficiency |
 
-## Main Routes
+Each agent cites specific quotes from the resume with `Meets / Unclear / Gap` judgments anchored to confirmed criteria.
 
-- `/upload-jd`
-- `/review-criteria`
-- `/upload-resumes`
-- `/results`
-- `/candidate/[id]`
+**3. Tier Ranking, Not Scores**
+Candidates are placed into `Strong Yes / Yes / Maybe / No`. Deliberate choice — numeric scores create false precision. The difference between 74 and 76 is noise. Tiers aren't.
+
+**4. On-Demand Deep Analysis**
+Bulk tier assignment runs lightweight. Full quote-level reasoning, conflict detection between agents, and AI-generated interview questions only trigger when a recruiter clicks in. Fast where it needs to be fast. Deep where it needs to be deep.
+
+---
+
+## Benefits
+
+- **Filter → Select**: shifts recruiter mindset from elimination to active choice
+- **Zero learning curve**: same workflow, AI added in — nothing restructured
+- **Multi-perspective alignment without the meeting**: recruiter sees all three lenses before the shortlist goes out
+- **Fewer false positives**: semantic evaluation catches candidates who look good on paper but can't do the job
+- **Fewer manual steps**: raw JD to annotated shortlist with one human checkpoint
+
+---
+
+## Architecture
+
+### Pipeline
+
+Upload JD
+→ LLM refines JD + extracts criteria
+→ Recruiter confirms/edits
+→ Upload resumes (PDF → text via pdf.js)
+→ 3 agents assign tier per candidate
+→ Recruiter clicks candidate
+→ 3 agents run quote-level analysis
+→ Summarizer agent: consensus + conflicts + interview questions
+
+
+
+### Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | Next.js, Tailwind CSS |
+| Orchestration | LangChain |
+| LLM | Gemini 3.0 Flash |
+| PDF Parsing | pdf.js (client-side) |
+
+**Why Gemini 3.0 Flash?**
+Slate runs 4 LLM calls per candidate. Cost compounds. Flash is the most affordable Tier-1 model with enough reasoning depth for semantic resume evaluation and strict JSON output— no Pro-tier capability needed, no Pro-tier price paid.
+
+
+*Built at [BIBI] · Presented at Google*
