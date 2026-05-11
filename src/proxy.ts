@@ -9,14 +9,12 @@ const MIN_PASSWORD_LENGTH = 16;
 export function proxy(request: NextRequest) {
   const requiredPassword = process.env.BIBI_APP_PASSWORD;
 
+  // If no password is configured, default to public access
   if (!requiredPassword) {
-    if (process.env.NODE_ENV !== "production") {
-      return NextResponse.next();
-    }
-
-    return serviceUnavailable();
+    return NextResponse.next();
   }
 
+  // If a password is provided but it's too weak, reject access for security
   if (process.env.NODE_ENV === "production" && requiredPassword.length < MIN_PASSWORD_LENGTH) {
     return serviceUnavailable();
   }
