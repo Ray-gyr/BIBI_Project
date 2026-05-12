@@ -7,6 +7,7 @@ Most recruiting tools help you filter faster. Slate helps you **choose better**.
 [![Watch the video](https://img.youtube.com/vi/fE3vUhxPvsk/maxresdefault.jpg)](https://youtu.be/fE3vUhxPvsk)
 
 click to watch the 3 min demo
+
 ---
 
 ## The Problem
